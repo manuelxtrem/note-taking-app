@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:note_taking_app/bloc/notes_bloc.dart';
+import 'package:note_taking_app/model/editor.dart';
 import 'package:note_taking_app/model/note.dart';
 import 'package:note_taking_app/res/colors.dart';
 import 'package:note_taking_app/res/icons.dart';
@@ -13,8 +14,6 @@ import 'package:note_taking_app/res/utils.dart';
 import 'package:note_taking_app/ui/common/button.dart';
 import 'package:note_taking_app/ui/common/dialogs.dart';
 import 'package:uuid/uuid.dart';
-
-enum EditorMode { add, edit, view }
 
 class EditorScreen extends StatefulWidget {
   // final EditorMode mode;
@@ -26,11 +25,12 @@ class EditorScreen extends StatefulWidget {
 }
 
 class _EditorScreenState extends State<EditorScreen> with DidBuild {
-  bool get _editMode => [EditorMode.add, EditorMode.edit].contains(_notesBloc.editorMode);
+  bool get _editMode => [EditorMode.add, EditorMode.edit].contains(_notesBloc.editorConfig.mode);
 
   late NotesBloc _notesBloc;
   final _titleCtrl = TextEditingController();
   final _bodyCtrl = TextEditingController();
+  final _mainFocus = FocusNode();
 
   bool _changed = false;
 
@@ -43,6 +43,9 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
       _titleCtrl.text = note.title;
       _bodyCtrl.text = note.body;
     }
+
+    // delay focus so animations can finish smoothly
+    _requestFocus();
   }
 
   @override
@@ -56,7 +59,6 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
       },
       child: BlocConsumer<NotesBloc, NotesState>(
         listener: (context, state) async {
-          log('state :: $state');
           if (state is NotesSavedState) {
             final notesBloc = context.read<NotesBloc>();
             notesBloc.add(GetAllNotesEvent());
@@ -65,82 +67,98 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
             Navigator.of(context).pop();
           }
         },
-        builder: (context, state) => Scaffold(
-          appBar: AppBar(
-            backgroundColor: AppColors.background,
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            title: AppIconButton(
-              icon: AppIcon.chevron,
-              size: 16,
-              onPressed: () {
-                _onDiscardNote();
-              },
-            ),
-            leading: const SizedBox(),
-            leadingWidth: 0,
-            actions: [
-              if (_notesBloc.editorMode == EditorMode.edit)
-                AppIconButton(
-                  icon: AppIcon.eye,
-                  onPressed: () => _onViewNote(),
-                ),
-              const SizedBox(width: 20),
-              if (_editMode)
-                AppIconButton(
-                  icon: AppIcon.save,
-                  onPressed: () => _onSaveNote(),
-                )
-              else
-                AppIconButton(
-                  icon: AppIcon.pencil,
-                  onPressed: () => _onEditNote(),
-                ),
-              const SizedBox(width: 15),
-            ],
-          ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                TextField(
-                  controller: _titleCtrl,
-                  focusNode: FocusNode()..requestFocus(),
-                  decoration: InputDecoration(
-                    hintText: 'Title',
-                    hintStyle: AppStyle.headline2.copyWith(color: AppColors.textMuted),
-                    border: InputBorder.none,
-                  ),
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
-                  style: AppStyle.headline2,
-                  enabled: _editMode,
-                  onChanged: (text) {
-                    log('changing title');
-                    _changed = true;
+        builder: (context, state) {
+          log('color ${_notesBloc.editorConfig.color}');
+          return Hero(
+            tag: _notesBloc.currentNote?.id ?? '_new_item',
+            child: Scaffold(
+              extendBodyBehindAppBar: true,
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
+                elevation: 0,
+                title: AppIconButton(
+                  icon: AppIcon.chevron,
+                  size: 16,
+                  onPressed: () {
+                    _onDiscardNote();
                   },
                 ),
-                TextField(
-                  controller: _bodyCtrl,
-                  decoration: InputDecoration(
-                    hintText: 'Type something...',
-                    hintStyle: AppStyle.body2.copyWith(color: AppColors.textMuted),
-                    border: InputBorder.none,
+                leading: const SizedBox(),
+                leadingWidth: 0,
+                actions: [
+                  if (_notesBloc.editorConfig.mode == EditorMode.edit)
+                    AppIconButton(
+                      icon: AppIcon.eye,
+                      onPressed: () => _onViewNote(),
+                    ),
+                  const SizedBox(width: 20),
+                  if (_editMode)
+                    AppIconButton(
+                      icon: AppIcon.save,
+                      onPressed: () => _onSaveNote(),
+                    )
+                  else
+                    AppIconButton(
+                      icon: AppIcon.pencil,
+                      onPressed: () => _onEditNote(),
+                    ),
+                  const SizedBox(width: 15),
+                ],
+              ),
+              body: Stack(
+                children: [
+                  Positioned(
+                    child: Container(
+                      color: (_notesBloc.editorConfig.color ?? AppColors.background).withOpacity(.08),
+                    ),
                   ),
-                  style: AppStyle.body2,
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
-                  enabled: _editMode,
-                  onChanged: (text) {
-                    log('changing body');
-                    _changed = true;
-                  },
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        TextField(
+                          controller: _titleCtrl,
+                          focusNode: _mainFocus,
+                          decoration: InputDecoration(
+                            hintText: 'Title',
+                            hintStyle: AppStyle.headline2.copyWith(color: AppColors.textMuted),
+                            border: InputBorder.none,
+                          ),
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline,
+                          style: AppStyle.headline2,
+                          enabled: _editMode,
+                          onChanged: (text) {
+                            log('changing title');
+                            _changed = true;
+                          },
+                        ),
+                        TextField(
+                          controller: _bodyCtrl,
+                          decoration: InputDecoration(
+                            hintText: 'Type something...',
+                            hintStyle: AppStyle.body2.copyWith(color: AppColors.textMuted),
+                            border: InputBorder.none,
+                          ),
+                          style: AppStyle.body2,
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline,
+                          enabled: _editMode,
+                          onChanged: (text) {
+                            log('changing body');
+                            _changed = true;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -163,7 +181,7 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
     );
     if (opt1 == DialogAction.positive) {
       // adding or editing
-      if (_notesBloc.editorMode == EditorMode.add) {
+      if (_notesBloc.editorConfig.mode == EditorMode.add) {
         Note newNote = Note(
           id: const Uuid().v4(),
           title: _titleCtrl.text,
@@ -192,7 +210,14 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
   }
 
   Future<void> _onEditNote() async {
-    _notesBloc.add(ChangeEditorModeEvent(EditorMode.edit));
+    _notesBloc.add(ChangeEditorModeEvent(_notesBloc.editorConfig.copyWith(mode: EditorMode.edit)));
+    _requestFocus();
+  }
+
+  void _requestFocus() {
+    Future.delayed(const Duration(milliseconds: 600), () {
+      _mainFocus.requestFocus();
+    });
   }
 
   Future _onDiscardNote({bool pop = true}) async {
@@ -200,11 +225,12 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
       if (pop) {
         Navigator.of(context).pop();
       } else {
-        _notesBloc.add(ChangeEditorModeEvent(EditorMode.view));
+        _notesBloc
+            .add(ChangeEditorModeEvent(_notesBloc.editorConfig.copyWith(mode: EditorMode.view)));
       }
     }
 
-    if (_notesBloc.editorMode == EditorMode.view) {
+    if (_notesBloc.editorConfig.mode == EditorMode.view) {
       popOrView();
       return;
     }
@@ -223,5 +249,12 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
     if (opt == DialogAction.negative) {
       popOrView();
     }
+  }
+
+  Color _getColor() {
+    if (_notesBloc.editorConfig.color != null) {
+      return _notesBloc.editorConfig.color!.darken(.75);
+    }
+    return AppColors.background;
   }
 }

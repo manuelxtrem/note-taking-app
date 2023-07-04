@@ -39,21 +39,21 @@ class NotesDeletedState extends NotesState {
 
 class NoteSelectedState extends NotesState {
   final Note note;
-  final EditorMode mode;
+  final EditorConfig config;
 
-  NoteSelectedState(this.note, this.mode);
+  NoteSelectedState(this.note, this.config);
 
   @override
-  List<Object?> get props => [note, mode];
+  List<Object?> get props => [note, config];
 }
 
 class EditorModeChangedState extends NotesState {
-  final EditorMode mode;
+  final EditorConfig config;
 
-  EditorModeChangedState(this.mode);
+  EditorModeChangedState(this.config);
 
   @override
-  List<Object?> get props => [mode];
+  List<Object?> get props => [config];
 }
 
 class FilteredNotesState extends NotesState {

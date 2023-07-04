@@ -63,12 +63,18 @@ class _NoteListItemState extends State<NoteListItem> {
           AnimatedOpacity(
             duration: const Duration(milliseconds: 300),
             opacity: _deleteMode ? 0 : 1,
-            child: Text(
-              widget.note.title,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.start,
-              style: AppStyle.body1.copyWith(color: AppColors.black),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.note.title,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.start,
+                    style: AppStyle.body1.copyWith(color: AppColors.black),
+                  ),
+                ),
+              ],
             ),
           ),
           if (_deleteMode) AppIcon.delete.draw(size: 30),

@@ -4,9 +4,10 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:note_taking_app/model/editor.dart';
 import 'package:note_taking_app/model/note.dart';
+import 'package:note_taking_app/res/colors.dart';
 import 'package:note_taking_app/res/constants.dart';
-import 'package:note_taking_app/ui/pages/editor_screen.dart';
 
 part 'notes_event.dart';
 part 'notes_state.dart';
@@ -16,8 +17,8 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   final List<Note> _allNotes = [];
   List<Note> get allNotes => _allNotes;
 
-  EditorMode _editorMode = EditorMode.view;
-  EditorMode get editorMode => _editorMode;
+  EditorConfig _editorConfig = EditorConfig(mode: EditorMode.view, color: AppColors.background);
+  EditorConfig get editorConfig => _editorConfig;
 
   Note? _currentNote;
   Note? get currentNote => _currentNote;
@@ -29,13 +30,13 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
       if (event is GetAllNotesEvent) {
         await _getAllnotes(emit);
       } else if (event is SelectNoteEvent) {
-        await _selectNote(emit, event.note, mode: event.mode);
+        await _selectNote(emit, event.note, mode: event.mode, color: event.color);
       } else if (event is SaveNoteEvent) {
         await _saveNote(emit, event.note);
       } else if (event is AddNoteEvent) {
         await _addNote(emit, event.note);
       } else if (event is ChangeEditorModeEvent) {
-        await _changeEditorMode(emit, event.mode);
+        await _changeEditorMode(emit, event.config);
       } else if (event is FilterNotesEvent) {
         await _filterNotes(emit, event.filter);
       } else if (event is DeleteNoteEvent) {
@@ -51,7 +52,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   Future _getAllnotes(Emitter<NotesState> emit) async {
     _allNotes.clear();
     _allNotes.addAll(_box.values);
-    _allNotes.sort((a, b) => a.createdAt.isAfter(b.createdAt) ? 1 : 0);
+    _allNotes.sort((a, b) => a.createdAt.isAfter(b.createdAt) ? 0 : 1);
 
     emit(NotesListState(_allNotes));
   }
@@ -61,7 +62,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
     await _box.put(note.id, note);
 
     _currentNote = note;
-    _editorMode = EditorMode.view;
+    _editorConfig = _editorConfig.copyWith(mode: EditorMode.view);
 
     emit(NotesSavedState(note));
   }
@@ -69,23 +70,27 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   Future _addNote(Emitter<NotesState> emit, Note note) async {
     await _box.put(note.id, note);
 
-    _editorMode = EditorMode.view;
+    _editorConfig = _editorConfig.copyWith(mode: EditorMode.view, color: AppColors.background);
     emit(NotesSavedState(note));
   }
 
-  Future _selectNote(Emitter<NotesState> emit, Note note, {EditorMode? mode}) async {
+  Future _selectNote(Emitter<NotesState> emit, Note note, {EditorMode? mode, Color? color}) async {
     _currentNote = note;
     if (mode != null) {
-      _editorMode = mode;
+      _editorConfig = _editorConfig.copyWith(mode: mode, color: color);
     }
 
-    emit(NoteSelectedState(note, _editorMode));
+    emit(NoteSelectedState(note, _editorConfig));
   }
 
-  Future _changeEditorMode(Emitter<NotesState> emit, EditorMode mode) async {
-    _editorMode = mode;
+  Future _changeEditorMode(Emitter<NotesState> emit, EditorConfig config) async {
+    if (config.mode == EditorMode.add) {
+      _currentNote = null;
+    }
 
-    emit(EditorModeChangedState(mode));
+    _editorConfig = config;
+
+    emit(EditorModeChangedState(config));
   }
 
   Future _filterNotes(Emitter<NotesState> emit, String filter) async {

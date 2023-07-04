@@ -20,6 +20,7 @@ class _SearchScreenState extends State<SearchScreen> {
   late NotesBloc _notesBloc;
   final _filterCtrl = TextEditingController();
   final _debouncer = Debouncer(milliseconds: 500);
+  final _mainFocus = FocusNode();
 
   @override
   void initState() {
@@ -27,6 +28,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // search debouncer
     _filterCtrl.addListener(_onFilterText);
+
+    // delay focus so animations can finish smoothly
+    _requestFocus();
   }
 
   void _onFilterText() {
@@ -64,17 +68,23 @@ class _SearchScreenState extends State<SearchScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _filterCtrl,
-                      focusNode: FocusNode()..requestFocus(),
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                        border: InputBorder.none,
-                        hintText: 'Search by the keyword...',
-                        hintStyle: AppStyle.body3.copyWith(color: AppColors.textMuted),
+                    child: Hero(
+                      tag: '_search',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: TextField(
+                          controller: _filterCtrl,
+                          focusNode: _mainFocus,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                            border: InputBorder.none,
+                            hintText: 'Search by the keyword...',
+                            hintStyle: AppStyle.body3.copyWith(color: AppColors.textMuted),
+                          ),
+                          cursorColor: AppColors.textMuted,
+                          style: AppStyle.body3.copyWith(color: AppColors.textMuted),
+                        ),
                       ),
-                      cursorColor: AppColors.textMuted,
-                      style: AppStyle.body3.copyWith(color: AppColors.textMuted),
                     ),
                   ),
                   IconButton(
@@ -107,5 +117,11 @@ class _SearchScreenState extends State<SearchScreen> {
         );
       },
     );
+  }
+
+  void _requestFocus() {
+    Future.delayed(const Duration(milliseconds: 600), () {
+      _mainFocus.requestFocus();
+    });
   }
 }

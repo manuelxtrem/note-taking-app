@@ -13,10 +13,10 @@ class InfoDialog extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Designed by - ?', style: style),
+        Text('Designed by - Divya Kelaskar', style: style),
         Text('Redesigned by - Emmanuel O. Agadzi', style: style),
         Text('Illustrations - StorySet', style: style),
-        Text('Icons - from design', style: style),
+        Text('Icons - Divya Kelaskar', style: style),
         Text('Font - Nunito (Google fonts)', style: style),
       ],
     );

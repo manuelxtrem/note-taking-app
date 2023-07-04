@@ -13,8 +13,9 @@ class GetAllNotesEvent extends NotesEvent {}
 class SelectNoteEvent extends NotesEvent {
   final Note note;
   final EditorMode? mode;
+  final Color? color;
 
-  SelectNoteEvent(this.note, {this.mode});
+  SelectNoteEvent(this.note, {this.mode, this.color});
 
   @override
   List<Object?> get props => [note];
@@ -39,12 +40,12 @@ class SaveNoteEvent extends NotesEvent {
 }
 
 class ChangeEditorModeEvent extends NotesEvent {
-  final EditorMode mode;
+  final EditorConfig config;
 
-  ChangeEditorModeEvent(this.mode);
+  ChangeEditorModeEvent(this.config);
 
   @override
-  List<Object?> get props => [mode];
+  List<Object?> get props => [config];
 }
 
 class FilterNotesEvent extends NotesEvent {
