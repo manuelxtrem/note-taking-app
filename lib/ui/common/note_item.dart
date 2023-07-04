@@ -6,13 +6,15 @@ import 'package:note_taking_app/model/note.dart';
 import 'package:note_taking_app/res/colors.dart';
 import 'package:note_taking_app/res/icons.dart';
 import 'package:note_taking_app/res/styles.dart';
+import 'package:note_taking_app/ui/common/dialogs.dart';
 
 class NoteListItem extends StatefulWidget {
   final Note note;
+  final Color? color;
   final Function? onDeleted;
   final Function? onSelected;
 
-  const NoteListItem({super.key, required this.note, this.onSelected, this.onDeleted});
+  const NoteListItem({super.key, required this.note, this.onSelected, this.onDeleted, this.color});
 
   @override
   State<NoteListItem> createState() => _NoteListItemState();
@@ -23,8 +25,9 @@ class _NoteListItemState extends State<NoteListItem> {
   Timer? _timer;
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -32,24 +35,27 @@ class _NoteListItemState extends State<NoteListItem> {
     return TextButton(
       style: ButtonStyle(
         padding: MaterialStateProperty.all(const EdgeInsets.fromLTRB(45, 20, 30, 20)),
-        backgroundColor:
-            MaterialStateProperty.all(_deleteMode ? AppColors.red : AppColors.babyPowderBlue),
+        backgroundColor: MaterialStateProperty.all(
+            _deleteMode ? AppColors.red : widget.color ?? AppColors.babyPowderBlue),
         shape: MaterialStateProperty.all(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
       ),
-      onPressed: () {
+      onPressed: () async {
         if (_deleteMode) {
-          cancelTimer();
-          // TODO start after dialog closes
+          _cancelTimer();
+          await _deleteNote();
+          _startTimer();
           return;
         }
+
+        _selectNote();
       },
       onLongPress: () {
         HapticFeedback.lightImpact();
         setState(() {
           _deleteMode = true;
         });
-        startTimer();
+        _startTimer();
       },
       child: Stack(
         alignment: Alignment.center,
@@ -61,6 +67,7 @@ class _NoteListItemState extends State<NoteListItem> {
               widget.note.title,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.start,
               style: AppStyle.body1.copyWith(color: AppColors.black),
             ),
           ),
@@ -70,7 +77,7 @@ class _NoteListItemState extends State<NoteListItem> {
     );
   }
 
-  startTimer() {
+  _startTimer() {
     _timer?.cancel();
     _timer = Timer(const Duration(seconds: 3), () {
       setState(() {
@@ -79,8 +86,29 @@ class _NoteListItemState extends State<NoteListItem> {
     });
   }
 
-  cancelTimer() {
+  _cancelTimer() {
     _timer?.cancel();
     _timer = null;
+  }
+
+  Future _deleteNote() async {
+    final opt = await Dialogs.showDoubleOptionDialog(
+      context,
+      'Are your sure you want delete this note ?',
+      positiveLabel: 'Keep',
+      negativeLabel: 'Delete',
+    );
+    if (opt == DialogAction.negative) {
+      widget.onDeleted?.call();
+    }
+
+    // remove delete button
+    setState(() {
+      _deleteMode = false;
+    });
+  }
+
+  void _selectNote() {
+    widget.onSelected?.call();
   }
 }

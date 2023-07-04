@@ -7,7 +7,9 @@ class AppTextButton extends StatelessWidget {
   final Function() onPressed;
   final String text;
   final Color? color;
-  const AppTextButton({super.key, required this.onPressed, required this.text, this.color});
+  final Color? textColor;
+  const AppTextButton(
+      {super.key, required this.onPressed, required this.text, this.color, this.textColor});
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +20,10 @@ class AppTextButton extends StatelessWidget {
         backgroundColor: MaterialStateProperty.all(color ?? AppColors.grey),
         shape: MaterialStateProperty.all(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
-                        
       ),
       child: Text(
         text,
-        style: AppStyle.body4,
+        style: AppStyle.body4.copyWith(color: textColor ?? AppColors.white),
       ),
     );
   }
@@ -38,8 +39,8 @@ class AppIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 50,
-      height: 50,
+      width: 45,
+      height: 45,
       child: TextButton(
         onPressed: onPressed,
         style: ButtonStyle(
@@ -47,7 +48,7 @@ class AppIconButton extends StatelessWidget {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
           backgroundColor: MaterialStateProperty.all(AppColors.grey),
         ),
-        child: Center(child: icon.draw(size: size ?? 24)),
+        child: Center(child: icon.draw(size: size ?? 20)),
       ),
     );
   }

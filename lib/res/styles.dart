@@ -30,6 +30,12 @@ class AppStyle {
     fontFamily: 'Nunito',
     color: AppColors.white,
   );
+  static const TextStyle body5 = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w400,
+    fontFamily: 'Nunito',
+    color: AppColors.white,
+  );
 
   static const TextStyle headline1 = TextStyle(
     fontSize: 43,

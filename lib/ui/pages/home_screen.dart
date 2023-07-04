@@ -4,9 +4,14 @@ import 'package:note_taking_app/bloc/notes_bloc.dart';
 import 'package:note_taking_app/res/colors.dart';
 import 'package:note_taking_app/res/icons.dart';
 import 'package:note_taking_app/res/styles.dart';
+import 'package:note_taking_app/res/utils.dart';
+import 'package:note_taking_app/ui/common/about_dialog.dart';
 import 'package:note_taking_app/ui/common/button.dart';
+import 'package:note_taking_app/ui/common/dialogs.dart';
 import 'package:note_taking_app/ui/common/empty_list.dart';
 import 'package:note_taking_app/ui/common/note_list.dart';
+import 'package:note_taking_app/ui/pages/editor_screen.dart';
+import 'package:note_taking_app/ui/pages/search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,17 +20,24 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with DidBuild {
   late NotesBloc _notesBloc;
 
   @override
+  void didBuild(BuildContext context) {
+    _notesBloc.add(GetAllNotesEvent());
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _notesBloc = context.read<NotesBloc>();
+
     return BlocConsumer<NotesBloc, NotesState>(
       listener: (context, state) {
         if (state is NotesInitialState) {
-          print('Initial state');
-          _notesBloc = context.read<NotesBloc>();
-          _notesBloc.add(InitNotesEvent());
+          _notesBloc.add(GetAllNotesEvent());
+        } else if (state is NotesDeletedState) {
+          _notesBloc.add(GetAllNotesEvent());
         }
       },
       builder: (context, state) {
@@ -52,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             child: TextButton(
-              onPressed: () {},
+              onPressed: () {
+                _notesBloc.add(ChangeEditorModeEvent(EditorMode.add));
+                Navigator.of(context).push(Utils.pageRoute(const EditorScreen()));
+              },
               child: Center(child: AppIcon.add.draw(size: 38)),
             ),
           ),
@@ -64,12 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
             actions: [
               AppIconButton(
                 icon: AppIcon.search,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).push(Utils.pageRoute(const SearchScreen()));
+                },
               ),
               const SizedBox(width: 20),
               AppIconButton(
                 icon: AppIcon.info,
-                onPressed: () {},
+                onPressed: () {
+                  Dialogs.showWidgetDialog(context, const InfoDialog());
+                },
               ),
               const SizedBox(width: 15),
             ],

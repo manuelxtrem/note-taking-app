@@ -3,9 +3,64 @@ part of 'notes_bloc.dart';
 @immutable
 abstract class NotesEvent extends Equatable {
   @override
-  List<Object?> get props => throw UnimplementedError();
+  List<Object?> get props => [];
 }
 
 class InitNotesEvent extends NotesEvent {}
 
 class GetAllNotesEvent extends NotesEvent {}
+
+class SelectNoteEvent extends NotesEvent {
+  final Note note;
+  final EditorMode? mode;
+
+  SelectNoteEvent(this.note, {this.mode});
+
+  @override
+  List<Object?> get props => [note];
+}
+
+class AddNoteEvent extends NotesEvent {
+  final Note note;
+
+  AddNoteEvent(this.note);
+
+  @override
+  List<Object?> get props => [note];
+}
+
+class SaveNoteEvent extends NotesEvent {
+  final Note note;
+
+  SaveNoteEvent(this.note);
+
+  @override
+  List<Object?> get props => [note];
+}
+
+class ChangeEditorModeEvent extends NotesEvent {
+  final EditorMode mode;
+
+  ChangeEditorModeEvent(this.mode);
+
+  @override
+  List<Object?> get props => [mode];
+}
+
+class FilterNotesEvent extends NotesEvent {
+  final String filter;
+
+  FilterNotesEvent(this.filter);
+
+  @override
+  List<Object?> get props => [filter];
+}
+
+class DeleteNoteEvent extends NotesEvent {
+  final Note note;
+
+  DeleteNoteEvent(this.note);
+
+  @override
+  List<Object?> get props => [note];
+}
