@@ -24,7 +24,7 @@ class EditorScreen extends StatefulWidget {
   State<EditorScreen> createState() => _EditorScreenState();
 }
 
-class _EditorScreenState extends State<EditorScreen> with DidBuild {
+class _EditorScreenState extends State<EditorScreen> with DidBuildMixin {
   bool get _editMode => [EditorMode.add, EditorMode.edit].contains(_notesBloc.editorConfig.mode);
 
   late NotesBloc _notesBloc;
@@ -110,7 +110,8 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
                 children: [
                   Positioned(
                     child: Container(
-                      color: (_notesBloc.editorConfig.color ?? AppColors.background).withOpacity(.08),
+                      color:
+                          (_notesBloc.editorConfig.color ?? AppColors.background).withOpacity(.08),
                     ),
                   ),
                   Padding(
@@ -187,6 +188,7 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
           title: _titleCtrl.text,
           body: _bodyCtrl.text,
           createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         );
 
         final notesBloc = context.read<NotesBloc>();
@@ -195,6 +197,7 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
         Note editedNote = _notesBloc.currentNote!.copyWith(
           title: _titleCtrl.text,
           body: _bodyCtrl.text,
+          updatedAt: DateTime.now(),
         );
 
         final notesBloc = context.read<NotesBloc>();
@@ -249,12 +252,5 @@ class _EditorScreenState extends State<EditorScreen> with DidBuild {
     if (opt == DialogAction.negative) {
       popOrView();
     }
-  }
-
-  Color _getColor() {
-    if (_notesBloc.editorConfig.color != null) {
-      return _notesBloc.editorConfig.color!.darken(.75);
-    }
-    return AppColors.background;
   }
 }

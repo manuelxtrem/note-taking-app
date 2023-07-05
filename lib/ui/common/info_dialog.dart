@@ -18,6 +18,7 @@ class InfoDialog extends StatelessWidget {
         Text('Illustrations - StorySet', style: style),
         Text('Icons - Divya Kelaskar', style: style),
         Text('Font - Nunito (Google fonts)', style: style),
+        Text('Image - Unsplash', style: style),
       ],
     );
   }

@@ -8,7 +8,7 @@ class Utils {
   }
 }
 
-mixin DidBuild<T extends StatefulWidget> on State<T> {
+mixin DidBuildMixin<T extends StatefulWidget> on State<T> {
   @protected
   void didBuild(BuildContext context);
 

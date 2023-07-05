@@ -62,5 +62,9 @@ class FilteredNotesState extends NotesState {
   FilteredNotesState(this.results);
 
   @override
-  List<Object?> get props => [Random().nextInt(10)];
+  List<Object?> get props => [results];
+}
+
+class NotesSyncedState extends NotesState {
+  NotesSyncedState();
 }

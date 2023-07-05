@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:note_taking_app/bloc/notes_bloc.dart';
+import 'package:note_taking_app/data/sync_service.dart';
 import 'package:note_taking_app/model/editor.dart';
 import 'package:note_taking_app/res/colors.dart';
 import 'package:note_taking_app/res/icons.dart';
@@ -21,7 +24,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with DidBuild {
+class _HomeScreenState extends State<HomeScreen>
+    with DidBuildMixin, WidgetsBindingObserver, SyncServiceMixin {
   late NotesBloc _notesBloc;
 
   @override
@@ -35,9 +39,13 @@ class _HomeScreenState extends State<HomeScreen> with DidBuild {
 
     return BlocConsumer<NotesBloc, NotesState>(
       listener: (context, state) {
+        log('state change :: $state');
+        
         if (state is NotesInitialState) {
           _notesBloc.add(GetAllNotesEvent());
         } else if (state is NotesDeletedState) {
+          _notesBloc.add(GetAllNotesEvent());
+        } else if (state is NotesSyncedState) {
           _notesBloc.add(GetAllNotesEvent());
         }
       },
@@ -106,5 +114,11 @@ class _HomeScreenState extends State<HomeScreen> with DidBuild {
         );
       },
     );
+  }
+
+  @override
+  syncOfflineNotes() {
+    log('syncOfflineNotes()');
+    _notesBloc.add(SyncNotesEvent());
   }
 }

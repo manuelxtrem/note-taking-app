@@ -65,3 +65,10 @@ class DeleteNoteEvent extends NotesEvent {
   @override
   List<Object?> get props => [note];
 }
+
+class SyncNotesEvent extends NotesEvent {
+  SyncNotesEvent();
+
+  @override
+  List<Object?> get props => [Random().nextInt(999)];
+}
