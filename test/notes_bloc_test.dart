@@ -5,7 +5,7 @@ import 'package:mockito/mockito.dart';
 import 'package:note_taking_app/bloc/notes_bloc.dart';
 import 'package:note_taking_app/model/note.dart';
 
-import 'mocks.dart';
+import '_mocks.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

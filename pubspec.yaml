@@ -26,6 +26,8 @@ dependencies:
   cloud_firestore: ^4.8.2
   firebase_auth: ^4.6.3
   mockito: ^5.4.2
+  firebase_auth_mocks: ^0.11.0
+  mock_exceptions: ^0.8.2
 
 dev_dependencies:
   flutter_test:

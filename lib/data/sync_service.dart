@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 mixin SyncServiceMixin<T extends StatefulWidget> on State<T>, WidgetsBindingObserver {
-  final Duration syncInterval = const Duration(seconds: 15); // TODO Change the interval to 5
+  final Duration syncInterval = const Duration(seconds: 15);
   Timer? syncTimer;
 
   @override

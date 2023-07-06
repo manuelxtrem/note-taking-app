@@ -1,4 +1,5 @@
 import 'package:connectivity/connectivity.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:note_taking_app/data/config_database.dart';
@@ -40,7 +41,25 @@ class MockNotesDatabase extends Mock implements NotesDatabase {
   }
 }
 
-class MockConfigDatabase extends Mock implements ConfigDatabase {}
+class MockConfigDatabase extends Mock implements ConfigDatabase {
+  MockConfigDatabase();
+  
+  @override
+  DateTime getLastSyncDate() {
+    return super.noSuchMethod(Invocation.method(#getLastSyncDate, [DateTime.now()]));
+  }
+
+  @override
+  Future setLastSyncDate(DateTime dateTime) async {}
+
+  @override
+  String? getUserId() {
+    return super.noSuchMethod(Invocation.method(#getUserId, ['fake_uid']));
+  }
+
+  @override
+  Future setUserId(String user) async {}
+}
 
 class MockNotesRepository extends Mock implements NotesRepository {
   @override
@@ -77,4 +96,8 @@ class MockConnectivity extends Mock implements Connectivity {
     return super.noSuchMethod(Invocation.method(#checkConnectivity, []),
         returnValue: ConnectivityResult.mobile);
   }
+}
+
+class MockGoogleAuthProvider extends Mock implements GoogleAuthProvider {
+
 }

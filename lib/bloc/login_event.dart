@@ -7,5 +7,12 @@ abstract class LoginEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoginWithGoogleEvent extends LoginEvent {}
+class LoginWithGoogleEvent extends LoginEvent {
+  final GoogleAuthProvider provider;
+
+  const LoginWithGoogleEvent(this.provider);
+
+  @override
+  List<Object> get props => [provider];
+}
 

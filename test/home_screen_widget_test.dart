@@ -8,7 +8,7 @@ import 'package:note_taking_app/ui/common/empty_list.dart';
 import 'package:note_taking_app/ui/common/note_list.dart';
 import 'package:note_taking_app/ui/pages/home_screen.dart';
 
-import '../mocks.dart';
+import '_mocks.dart';
 
 void main() {
   late NotesBloc notesBloc;

@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> with DidBuildMixin {
 
   @override
   Future<void> didBuild(BuildContext context) async {
-    // TODO check cache login after some time
+    // check cache login after some time
     await Future.delayed(const Duration(seconds: 1));
 
     if (_loginBloc.isLoggedIn) {
@@ -121,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> with DidBuildMixin {
                         ),
                         onPressed: () {
                           if (!loading) {
-                            _loginBloc.add(LoginWithGoogleEvent());
+                            _loginBloc.add(LoginWithGoogleEvent(GoogleAuthProvider()));
                           }
                         },
                       ),

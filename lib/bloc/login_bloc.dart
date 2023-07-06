@@ -17,15 +17,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({required this.firebaseAuth, required this.configDatabase}) : super(LoginInitialState()) {
     on<LoginEvent>((event, emit) async {
       if (event is LoginWithGoogleEvent) {
-        await _loginWithGoogle(emit);
+        await _loginWithGoogle(emit, event.provider);
       }
     });
   }
 
-  Future _loginWithGoogle(Emitter<LoginState> emit) async {
+  Future _loginWithGoogle(Emitter<LoginState> emit, GoogleAuthProvider provider) async {
     emit(LoginLoadingState());
     try {
-      final userCredential = await firebaseAuth.signInWithProvider(GoogleAuthProvider());
+      final userCredential = await firebaseAuth.signInWithProvider(provider);
       if (userCredential.user != null) {
         configDatabase.setUserId(userCredential.user!.uid);
 
